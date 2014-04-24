@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 from datetime import datetime
 from mock import patch, Mock, call, MagicMock
 from wtforms import TextField
-from ext.honeypot.fields import HoneyPotField, RANDOM_STYLES, HONEY_POT_PREFIX
-from ext.honeypot.test import WTFHoneyPotTestCase
+from flask_wtf_honeypot.ext.honeypot.fields import HoneyPotField, RANDOM_STYLES, HONEY_POT_PREFIX
+from flask_wtf_honeypot.ext.honeypot.test import WTFHoneyPotTestCase
 
 
 class HoneyPotFieldTestCase(WTFHoneyPotTestCase):
-    @patch('ext.honeypot.fields.current_app')
-    @patch('ext.honeypot.fields.HoneyPotField.random')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.current_app')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.random')
     def get_field(self, random,current_app):
         random.return_value = 'be_random'
         current_app.config = {'WTF_HONEY_POT_PRIVATE_KEY': 'abc'}
@@ -19,9 +19,9 @@ class HoneyPotFieldTestCase(WTFHoneyPotTestCase):
 
 class HoneyPotFieldRootTestCase(HoneyPotFieldTestCase):
 
-    @patch('ext.honeypot.fields.current_app')
-    @patch('ext.honeypot.fields.randint')
-    @patch('ext.honeypot.fields.HoneyPotField.random')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.current_app')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.randint')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.random')
     def test_init(self, random, randint, current_app):
         randint.return_value = 3
         random.return_value = 'not_random'
@@ -33,15 +33,15 @@ class HoneyPotFieldRootTestCase(HoneyPotFieldTestCase):
         self.assertEqual(field.timeout, 300)
 
     #60-61, 72, 104-105, 140
-    @patch('ext.honeypot.fields.current_app')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.current_app')
     def test_init_bad_key(self, current_app):
         current_app.config = {'WTF': 'abc'}
         with self.assertRaises(RuntimeError):
             HoneyPotField().bind(None, 'other', prefix='', translations=None)
 
-    @patch('ext.honeypot.fields.current_app')
-    @patch('ext.honeypot.fields.randint')
-    @patch('ext.honeypot.fields.HoneyPotField.random')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.current_app')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.randint')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.random')
     def test_init_timeout(self, random, randint, current_app):
         randint.return_value = 3
         random.return_value = 'not_random'
@@ -55,13 +55,13 @@ class HoneyPotFieldRootTestCase(HoneyPotFieldTestCase):
         self.assertEqual(field.unbound_field.field_class, TextField)
         self.assertEqual(field.timeout, 20)
 
-    @patch('ext.honeypot.fields.HoneyPotField.random')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.random')
     def test_short_name(self, random):
         random.return_value = 'be_random'
         field = self.get_field()
         self.assertEqual(field.short_name, 'be_random')
 
-    @patch('ext.honeypot.fields.choice')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.choice')
     def test_style(self, choice):
         field = self.get_field()
         _ = field.style
@@ -80,8 +80,8 @@ class HoneyPotFieldRootTestCase(HoneyPotFieldTestCase):
         expected = field.hash_entries(12345)
         self.assertEqual(expected, '2e0ecd36fe260c06cf50fecac17ea0242a0046bcb697dadaa2cb5c3abb7c32df')
 
-    @patch('ext.honeypot.fields.HoneyPotField.random')
-    @patch('ext.honeypot.fields.HoneyPotField._get_epoch')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.random')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField._get_epoch')
     def test_reset(self, _get_epoch, random):
         random.return_value = '1'
         _get_epoch.return_value = 123
@@ -133,13 +133,13 @@ class HoneyPotFieldRootTestCase(HoneyPotFieldTestCase):
 
 class HoneyPotFieldProcessTestCase(HoneyPotFieldTestCase):
 
-    @patch('ext.honeypot.fields.HoneyPotField.reset_honeypot')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.reset_honeypot')
     def test_process_empty_formdata(self, reset_honeypot):
         field = self.get_field()
         field.process(None)
         self.assertTrue(reset_honeypot.called)
 
-    @patch('ext.honeypot.fields.HoneyPotField.reset_honeypot')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.reset_honeypot')
     def test_process_empty_formdata_exception(self, reset_honeypot):
         field = self.get_field()
 
@@ -163,7 +163,7 @@ class HoneyPotFieldProcessTestCase(HoneyPotFieldTestCase):
         self.assertEqual(expected_process, actual_process)
 
 
-    @patch('ext.honeypot.fields.HoneyPotField.random')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.random')
     def test_process_form_with_formdata(self, random):
         random.return_value = 'random'
         formdata = {
@@ -254,7 +254,7 @@ class HoneyPotFieldValidationTestCase(HoneyPotFieldTestCase):
         self._populate_field(field, hp_field_data=u'some data')
         self.assertFalse(field.validate(None))
 
-    @patch('ext.honeypot.fields.HoneyPotField.validate_time')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.validate_time')
     def test_validation_invalid_time(self, validate_time):
         validate_time.return_value = False
         field = self.get_field()
@@ -266,7 +266,7 @@ class HoneyPotFieldValidationTestCase(HoneyPotFieldTestCase):
         self._populate_field(field, hash_control='not hashed')
         self.assertFalse(field.validate(None))
 
-    @patch('ext.honeypot.fields.HoneyPotField.reset_honeypot')
+    @patch('flask_wtf_honeypot.ext.honeypot.fields.HoneyPotField.reset_honeypot')
     def test_validation_cleanup(self, reset_honeypot):
         field = self.get_field()
         self._populate_field(field, hash_control='not hashed')

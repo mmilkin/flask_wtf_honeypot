@@ -1,6 +1,6 @@
 from mock import Mock
-from ext.honeypot.test import WTFHoneyPotTestCase
-from ext.honeypot.widgets import HoneyPotWidget
+from flask_wtf_honeypot.ext.honeypot.test import WTFHoneyPotTestCase
+from flask_wtf_honeypot.ext.honeypot.widgets import HoneyPotWidget
 
 
 class HoneyPotWidgetTestCase(WTFHoneyPotTestCase):
