@@ -110,6 +110,26 @@ class HoneyPotFieldRootTestCase(HoneyPotFieldTestCase):
         self.assertEqual(expected_bind, actual_bind)
         self.assertEqual(expected_processed, actual_processed)
 
+    def test_iteration(self):
+        field = self.get_field()
+        field.entries = ['one']
+
+        for entrie in field:
+            self.assertEqual(entrie, 'one')
+
+    def test_test_index(self):
+        field = self.get_field()
+        field.entries = ['one', 'two', 'three']
+
+        self.assertEqual(field[0], 'one')
+        self.assertEqual(field[1], 'two')
+        self.assertEqual(field[2], 'three')
+
+    def test_length(self):
+        field = self.get_field()
+        field.entries = ['one', 'two', 'three']
+        self.assertEqual(len(field), 3)
+
 
 class HoneyPotFieldProcessTestCase(HoneyPotFieldTestCase):
 
@@ -181,7 +201,6 @@ class HoneyPotFieldValidationTestCase(HoneyPotFieldTestCase):
 
     def _populate_field(self, field, hp_field_data=None, hash_control=None):
         field.private_key = 'private'
-        field.data = u'some data'
         field.timeout = 2000
         first = Mock(name='first')
         first.data = hp_field_data
@@ -216,7 +235,12 @@ class HoneyPotFieldValidationTestCase(HoneyPotFieldTestCase):
     def test_validation_no_data(self):
         field = self.get_field()
         self._populate_field(field)
-        field.data = None
+        field.entries = []
+        control = Mock(control='control')
+        now = datetime.now().strftime('%s')
+        control.name = HoneyPotField.get_control_prefix() + now
+        control.data = None
+        field.entries = [control]
         self.assertFalse(field.validate(None))
 
     def test_validation_no_controll_field(self):

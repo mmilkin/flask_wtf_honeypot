@@ -162,3 +162,16 @@ class HoneyPotField(Field):
         field.process(formdata, data)
         self.entries.append(field)
         return field
+
+    def __iter__(self):
+        return iter(self.entries)
+
+    def __len__(self):
+        return len(self.entries)
+
+    def __getitem__(self, index):
+        return self.entries[index]
+
+    @property
+    def data(self):
+        return [f.data for f in self.entries]
