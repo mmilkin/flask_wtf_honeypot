@@ -28,7 +28,7 @@ setup(
     author_email='mmilkin@gmail.com',
     description='HoneyPot Field for Flask WTForms',
     packages=[
-        'flask-wtf-honeypot',
+        'flask_wtf_honeypot',
     ],
     test_suite='nose.collector',
     zip_safe=False,
